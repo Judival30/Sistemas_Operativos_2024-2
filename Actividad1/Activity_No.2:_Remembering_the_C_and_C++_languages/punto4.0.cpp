@@ -1,157 +1,145 @@
 #include <iostream>
+#include <cmath>
+#include <string>
 
 using namespace std;
 
+// Clase base Figura
 class Figura
 {
 private:
     string color;
-    double area;
-    double perimetro;
 
 public:
-    Figura() {};
-    Figura(string c)
-    {
-        color = c;
-    }
-    virtual double area();
-    virtual double perimetro();
-    virtual void changeColor();
-    void printInfo()
-    {
-        printf("Area: %f\nPerimetro: %f\n", area, perimetro);
-        cout << color << endl;
-    }
-    void setPerimetro(double per)
-    {
-        perimetro = per;
-    }
-    void setArea(double a)
-    {
-        area = a;
-    }
-    void setColor(string &s)
+    virtual double area() const = 0;
+    virtual double perimetro() const = 0;
+
+    void setColor(const string &s)
     {
         color = s;
     }
+    string getColor() const
+    {
+        return color;
+    }
 };
 
-class Circulo : Figura
+// Clase derivada Circulo con herencia pública
+class Circulo : public Figura
 {
 private:
     double radio;
 
 public:
     Circulo() {}
-    Circulo(double r, string c) : Figura(c)
+    Circulo(double r)
     {
         radio = r;
     }
-    double perimetro() override
+    double perimetro() const override
     {
-        double perimetro = 2 * 3.14 * radio;
-        setPerimetro(perimetro);
-        return perimetro;
+        return 2 * 3.14 * radio;
     }
-    double area() override
+    double area() const override
     {
-        double area = 3.14 * radio * radio;
-        setArea(area);
-        return area;
-    }
-    void printrInfo()
-    {
-        printf("Circulo\nRadio: %d\n", radio);
-        printInfo();
+        return 3.14 * radio * radio;
     }
 };
 
-class Cuadrado : Figura
+// Clase derivada Cuadrado con herencia pública
+class Cuadrado : public Figura
 {
 private:
     double lado;
 
 public:
     Cuadrado() {}
-    Cuadrado(double l, string c) : Figura(c)
+    Cuadrado(double l)
     {
         lado = l;
     }
-    double perimetro() override
+    double perimetro() const override
     {
-        double perimetro = lado * 4;
-        setPerimetro(perimetro);
-        return perimetro;
+        return lado * 4;
     }
-    double area() override
+    double area() const override
     {
-        double area = lado * lado;
-        setArea(area);
-        return area;
+        return lado * lado;
     }
 };
 
-class Rectagulo : Figura
+// Clase derivada Rectangulo con herencia pública
+class Rectangulo : public Figura
 {
 private:
     double base;
     double altura;
 
 public:
-    Rectagulo() {}
-    Rectagulo(double b, double h, string c) : Figura(c)
+    Rectangulo() {}
+    Rectangulo(double b, double h)
     {
         base = b;
         altura = h;
     }
-    double perimetro() override
+    double perimetro() const override
     {
-        double perimetro = base * 2 + altura * 2;
-        setPerimetro(perimetro);
-        return perimetro;
+        return 2 * (base + altura);
     }
-    double area() override
+    double area() const override
     {
-        double area = base * altura;
-        setArea(area);
-        return area;
+        return base * altura;
     }
 };
 
-class Triangulo : Figura
+// Clase derivada Triangulo con herencia pública
+class Triangulo : public Figura
 {
 private:
     double altura;
     double base;
 
 public:
-    Triangulo();
-    Triangulo(double h, double a, string c) : Figura(c)
+    Triangulo() {}
+    Triangulo(double h, double a)
     {
         altura = h;
         base = a;
     }
 
-    double area()
+    double area() const override
     {
-        double area = (base * altura) / 2;
-        setArea(area);
-        return area;
+        return (base * altura) / 2;
     }
 
-    double perimetro()
+    double perimetro() const override
     {
-        double perimetro = base * 3;
-        setPerimetro(perimetro);
-        return perimetro;
+        return base * 3;
     }
 };
 
 int main()
 {
-    Circulo circulo(5.0, "rojo");
-    circulo.printrInfo();
+    Rectangulo rect(5.0, 3.0);
+    rect.setColor("Red");
+    cout << "Rectangulo color: " << rect.getColor() << endl;
+    cout << "Area: " << rect.area() << endl;
+    cout << "Perimetro: " << rect.perimetro() << endl;
+    cout << endl;
+
+    Cuadrado sq(4.0);
+    sq.setColor("Blue");
+    cout << "Cuadrado color: " << sq.getColor() << endl;
+    cout << "Area: " << sq.area() << endl;
+    cout << "Perimetro: " << sq.perimetro() << endl;
+    cout << endl;
+
+    Triangulo tri(3.0, 4.0);
+    tri.setColor("Green");
+    cout << "Triangulo color: " << tri.getColor() << endl;
+    cout << "Area: " << tri.area() << endl;
+    cout << "Perimetro: " << tri.perimetro() << endl;
+    cout << endl;
 
     return 0;
 }
