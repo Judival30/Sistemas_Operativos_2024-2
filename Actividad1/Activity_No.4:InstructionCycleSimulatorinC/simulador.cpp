@@ -1,6 +1,7 @@
 #include <iostream>
 #include <map>
 #include <vector>
+#include <unistd.h>
 using namespace std;
 
 class Register
@@ -81,7 +82,7 @@ class VonNeuman
 {
 private:
     map<string, Register> memory;
-    Register PC, MAR, ICR, MDR, acumulador;
+    Register PC, MAR, ICR, MDR, acumulador, unitControl;
     State curState;
     ALU Alu;
     map<string, State> insMap;
@@ -124,8 +125,11 @@ public:
         case State::SHW:
             shw();
             break;
+        case State::PAUSE:
+            pause();
+            break;
         case State::END:
-            printf("Se acabo\n");
+            printf("The program finished correctly\n");
             break;
         }
     }
@@ -150,7 +154,7 @@ public:
             string key = "D" + to_string(i);
             memory[key] = tmp;
         }
-        printf("Hola");
+        // printf("Hola");
         transition(State::Read);
         events();
     }
@@ -159,8 +163,10 @@ public:
     {
         string ins;
         cin >> ins;
-        cout << ins << endl;
+        // cout << ins << endl;
         transition(insMap[ins]);
+        ICR.setInstrucction(ins);
+        unitControl.setInstrucction(ins);
         events();
     }
     void set()
@@ -170,6 +176,7 @@ public:
         cin >> pos >> val >> null >> null;
         MAR.setInstrucction(pos);
         MDR.setVal(val);
+
         memory[MAR.getInstrucction()].setVal(MDR.getVal());
 
         transition(State::Read);
@@ -188,13 +195,33 @@ public:
 
     void add()
     {
-        string pos, null;
-        cin >> pos >> null >> null >> null;
-        Alu.setA(acumulador.getVal());
-        MAR.setInstrucction(pos);
-        MDR.setVal(memory[MAR.getInstrucction()].getVal());
-        Alu.setB(MDR.getVal());
-        acumulador.setVal(Alu.add());
+        string pos0, pos1, pos2, null;
+        cin >> pos0 >> pos1 >> pos2 >> null;
+        if (pos2 != "NULL")
+        {
+            MAR.setInstrucction(pos2);
+            MDR.setVal(memory[MAR.getInstrucction()].getVal());
+            Alu.setA(memory[pos0].getVal());
+            Alu.setB(memory[pos1].getVal());
+            memory[pos2].setVal(Alu.add());
+        }
+        else if (pos1 != "NULL")
+        {
+            MAR.setInstrucction(pos1);
+            MDR.setVal(memory[MAR.getInstrucction()].getVal());
+            Alu.setA(memory[pos0].getVal());
+            Alu.setB(memory[pos1].getVal());
+            acumulador.setVal(Alu.add());
+        }
+        else
+        {
+
+            Alu.setA(acumulador.getVal());
+            MAR.setInstrucction(pos0);
+            MDR.setVal(memory[MAR.getInstrucction()].getVal());
+            Alu.setB(MDR.getVal());
+            acumulador.setVal(Alu.add());
+        }
         transition(State::Read);
         // cout << Alu.add();
         events();
@@ -207,7 +234,7 @@ public:
         MAR.setInstrucction(pos);
         MDR.setVal(memory[MAR.getInstrucction()].getVal());
         Alu.setB(MDR.getVal());
-        acumulador.setVal(Alu.sub());
+        memory[pos].setVal(Alu.sub());
         transition(State::Read);
         events();
     }
@@ -219,7 +246,7 @@ public:
         MAR.setInstrucction(pos);
         MDR.setVal(memory[MAR.getInstrucction()].getVal());
         Alu.setB(MDR.getVal());
-        acumulador.setVal(Alu.sub());
+        memory[pos].setVal(Alu.sub());
         transition(State::Read);
         events();
     }
@@ -227,7 +254,21 @@ public:
     {
         string pos, null;
         cin >> pos >> null >> null >> null;
-        cout << memory[pos].getVal() << endl;
+        cout << "SHOW -> " << pos << ": ";
+        if (pos == "ACC")
+            cout << acumulador.getVal() << endl;
+        else if (pos == "ICR")
+            cout << ICR.getInstrucction() << endl;
+        else if (pos == "MAR")
+            cout << MAR.getInstrucction() << endl;
+        else if (pos == "MDR")
+            cout << MDR.getVal() << endl;
+        else if (pos == "UC")
+            cout << unitControl.getInstrucction() << endl;
+        else if (pos == "PC")
+            cout << PC.getVal() << endl;
+        else
+            cout << memory[pos].getVal() << endl;
         transition(State::Read);
         events();
     }
@@ -237,6 +278,14 @@ public:
         cin >> pos >> null >> null >> null;
         memory[pos].setVal(acumulador.getVal());
         // cout << memory[pos].getVal() << endl;
+        transition(State::Read);
+        events();
+    }
+    void pause()
+    {
+        string null;
+        cin >> null >> null >> null >> null;
+        sleep(1);
         transition(State::Read);
         events();
     }
