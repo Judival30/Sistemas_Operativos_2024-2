@@ -21,7 +21,7 @@ void MultiLevelQ::MLQ(vector<Process> &vec)
 {
     sort(vec.begin(), vec.end());
     line = "";
-    printf("Exec:\n| ID | currTime | Q |\n");
+    printf("Exec MLQ:\n| ID | currTime | Q |\n");
     int contInc = 0, curTime = 0, i = 1;
     pair<Process, int> tmp;
     priority_queue<Process, vector<Process>, decltype(compQueveLevel)> ready(compQueveLevel);
@@ -102,6 +102,78 @@ void MultiLevelQ::printResults()
     }
     printf("\nProm: CT: %.2f, TAT: %.2f, WT: %.2f, RT: %.2f\n", ctp / len, tatp / len, wtp / len, rtp / len);
 }
+
+auto compArrival = [](const Process &a, const Process &b)
+{
+    return a.AT > b.AT;
+};
+
+void MultiLevelQ::MLFQ(vector<Process> &vec)
+{
+    line = "";
+    printf("Exec MLFQ:\n| ID | Time | Q |\n");
+    int currQ = 0, curTime = 0, i = 1;
+    pair<Process, int> tmp;
+    priority_queue<Process, vector<Process>, decltype(compArrival)> ready(compArrival);
+    Process p;
+    for (int i = 0; i < vec.size(); i++)
+        ready.push(vec[i]);
+    bool flag = true;
+    int cont = 0;
+    int contPfini = 0;
+    while (flag)
+    {
+        currQ = 0;
+        cont++;
+
+        while (currQ < arq.size())
+        {
+            bool flagNewP = true;
+            while (!ready.empty() && flagNewP)
+            {
+                // cout << curTime << " " << ready.top().AT << endl;
+                if (curTime >= ready.top().AT)
+                {
+                    p = ready.top();
+                    ready.pop();
+                    arq[currQ]->push(p);
+                }
+                else
+                    flagNewP = false;
+            }
+            if (arq[currQ]->empty())
+                currQ++;
+            else
+            {
+                tmp = arq[currQ]->pop();
+                if (!tmp.first.visited)
+                {
+                    tmp.first.rt = curTime;
+                    tmp.first.visited = true;
+                }
+                curTime += tmp.second;
+                line += "|";
+                for (int i = 0; i < tmp.second; i++)
+                    line += "-";
+                cout << "| " << tmp.first.ID;
+                printf(" |%6d|%3d|\n", curTime, currQ);
+                if (tmp.first.isFinished())
+                {
+                    tmp.first.setCT(curTime);
+                    stats.push_back(tmp.first);
+                    contPfini++;
+                }
+                else if (currQ + 1 < arq.size())
+                    arq[currQ + 1]->push(tmp.first);
+                else
+                    arq[currQ]->push(tmp.first);
+            }
+        }
+
+        if (contPfini == vec.size())
+            flag = false;
+    }
+}
 auto compLine = [](const Process &a, const Process &b)
 {
     return a.ct < b.ct;
@@ -116,16 +188,31 @@ void MultiLevelQ::printGrandChart()
     cout << endl
          << "Grand Chart:\n"
          << line << endl;
-    pos = 0;
-    for (int i = 0; i < stats.size(); i++)
+    if (line.size() / stats.size() > 10)
     {
-        acum = (stats[i].ct - pos) / 2;
-        for (int j = 0; j < acum; j++)
-            cout << " ";
-        cout << stats[i].ID;
-        for (int j = 0; j < acum; j++)
-            cout << " ";
-        pos += stats[i].BT;
+        pos = 0;
+        for (int i = 0; i < line.size(); i++)
+        {
+            if (i == stats[pos].ct)
+            {
+                cout << stats[pos].ID;
+                if (pos + 1 < stats.size())
+                    pos++;
+            }
+            else
+                cout << " ";
+        }
+        cout << endl;
+        /* for (int i = 0; i < stats.size(); i++)
+        {
+            acum = (stats[i].ct - pos) / 2;
+            for (int j = 0; j < acum; j++)
+                cout << " ";
+            cout << stats[i].ID;
+            for (int j = 0; j < acum; j++)
+                cout << " ";
+            pos += stats[i].BT;
+        } */
     }
     cout << endl
          << endl;

@@ -35,13 +35,15 @@ int main()
     while (num--)
     {
         cin >> id >> at >> bt >> qid;
-
         Process p(id, at, bt, qid, i);
+        // cout << id << " " << at << endl;
         vec.push_back(p);
         i++;
     }
     if (type == "MLQ")
         colas.MLQ(vec);
+    else
+        colas.MLFQ(vec);
     colas.printGrandChart();
     colas.printResults();
 

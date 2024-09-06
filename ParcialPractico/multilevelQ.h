@@ -16,6 +16,7 @@ public:
     MultiLevelQ();
     void pushNewQueue(QueueP *p);
     void MLQ(vector<Process> &vec);
+    void MLFQ(vector<Process> &vec);
     void printResults();
     void printGrandChart();
 };
