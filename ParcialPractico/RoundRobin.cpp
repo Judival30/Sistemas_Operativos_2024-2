@@ -29,3 +29,8 @@ pair<Process, int> RoundRobin::pop()
     ans.second = timeUsed;
     return ans;
 }
+
+bool RoundRobin::empty()
+{
+    return q.empty();
+}

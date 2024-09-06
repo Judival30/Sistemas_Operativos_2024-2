@@ -1,22 +1,18 @@
-#ifndef ROUNDRIBIN
-#define ROUNDRIBIN
+#ifndef FCFS_H
+#define FCFS_H
 
 #include <queue>
 #include "Queue.h"
 #include "process.h"
 #include <vector>
 
-class RoundRobin : public QueueP
+class FCFS : public QueueP
 {
 private:
-    int quantum;
     queue<Process> q;
 
 public:
-    RoundRobin();
-    RoundRobin(vector<Process> &v);
-
-    void setQuantum(int q);
+    FCFS();
     void push(Process &p) override;
     pair<Process, int> pop() override;
     bool empty() override;
